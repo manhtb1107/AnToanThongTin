@@ -20,13 +20,13 @@
             align-items: center;
             padding: 20px;
         }
-        
+
         @keyframes gradient {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-        
+
         .card {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -36,19 +36,19 @@
             width: 100%;
             transition: transform 0.3s ease;
         }
-        
+
         .card:hover {
             transform: translateY(-5px);
         }
-        
+
         .input-field, .button, textarea {
             transition: all 0.3s ease;
         }
-        
+
         .input-field:focus, .button:hover, textarea:focus {
             transform: scale(1.02);
         }
-        
+
         .result-box {
             background: #f8fafc;
             border-radius: 10px;
@@ -58,16 +58,35 @@
             overflow-y: auto;
             border: 1px solid #e2e8f0;
         }
-        
+
         .download-section {
             margin-top: 1rem;
             display: flex;
             align-items: center;
             gap: 1rem;
         }
-        
+
         .error-message i {
             margin-right: 0.5rem;
+        }
+
+        #result-message {
+            margin-top: 1rem;
+            text-align: center;
+            color: #4a5568;
+        }
+
+        #download-links {
+            margin-top: 1rem;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        #download-links a {
+            display: block;
+            color: #4a5568;
+            text-decoration: underline;
+            margin-bottom: 0.5rem;
         }
     </style>
 </head>
@@ -78,7 +97,7 @@
         <form id="des-form" class="space-y-6">
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Chọn phương thức nhập liệu</label>
-                <div class="flex items-center space-x-6">
+                <div class="flex items-center space-x-4 flex-wrap">
                     <label class="flex items-center">
                         <input type="radio" name="input-method" value="file" class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300" checked>
                         <span class="ml-2 text-sm text-gray-600">Chọn file</span>
@@ -86,6 +105,7 @@
                     <label class="flex items-center">
                         <input type="radio" name="input-method" value="text" class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300">
                         <span class="ml-2 text-sm text-gray-600">Nhập trực tiếp</span>
+                    </label>
                     </label>
                 </div>
             </div>
@@ -97,9 +117,17 @@
                 <label for="text-input" class="block text-sm font-medium text-gray-700 flex items-center"><i class="fas fa-keyboard mr-2"></i> Nhập nội dung</label>
                 <textarea id="text-input" rows="5" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Nhập nội dung, mỗi dòng sẽ được mã hóa/giải mã riêng..."></textarea>
             </div>
+            <div id="image-input-section" class="hidden">
+                <label for="image" class="block text-sm font-medium text-gray-700 flex items-center"><i class="fas fa-image mr-2"></i> Chọn một hình ảnh</label>
+                <input type="file" id="image" accept=".jpg,.jpeg,.png" class="input-field mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200">
+            </div>
+            <div id="images-input-section" class="hidden">
+                <label for="images" class="block text-sm font-medium text-gray-700 flex items-center"><i class="fas fa-images mr-2"></i> Chọn nhiều hình ảnh</label>
+                <input type="file" id="images" accept=".jpg,.jpeg,.png" multiple class="input-field mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200">
+            </div>
             <div>
-                <label for="key" class="block text-sm font-medium text-gray-700">Khóa (8 ký tự)</label>
-                <input type="text" id="key" maxlength="8" class="input-field mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                <label for="key" class="block text-sm font-medium text-gray-700">Khóa (bất kỳ độ dài)</label>
+                <input type="text" id="key" class="input-field mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
             </div>
             <div class="space-y-2">
                 <label class="block text-sm font-medium text-gray-700">Hành động</label>
@@ -119,18 +147,19 @@
             </div>
         </form>
 
-        <!-- Khu vực hiển thị kết quả -->
+        <!-- Khu vực hiển thị kết quả hoặc thông báo -->
         <div id="result-section" class="hidden">
             <h2 class="text-lg font-semibold text-gray-700 mt-6 mb-2">Kết quả</h2>
             <div class="result-box">
-                <p class="text-sm text-gray-600"><strong>Trước xử lý:</strong></p>
-                <pre id="before-content" class="text-sm text-gray-800"></pre>
-                <p class="text-sm text-gray-600 mt-2"><strong>Sau xử lý:</strong></p>
-                <pre id="after-content" class="text-sm text-gray-800"></pre>
+                <p id="result-message" class="text-sm text-gray-600"></p>
+                <pre id="before-content" class="text-sm text-gray-800 hidden"></pre>
+                <p class="text-sm text-gray-600 mt-2 hidden"><strong>Sau xử lý:</strong></p>
+                <pre id="after-content" class="text-sm text-gray-800 hidden"></pre>
             </div>
             <div class="download-section">
-                <input type="text" id="download-name" placeholder="Tên file tải về (không cần đuôi)" class="input-field w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <button id="download-btn" class="button py-2 px-4 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center"><i class="fas fa-download mr-2"></i> Tải file</button>
+                <input type="text" id="download-name" placeholder="Tên file tải về (không cần đuôi)" class="input-field w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 hidden">
+                <button id="download-btn" class="button py-2 px-4 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center hidden"><i class="fas fa-download mr-2"></i> Tải file</button>
+                <div id="download-links" class="hidden"></div>
             </div>
         </div>
     </div>
